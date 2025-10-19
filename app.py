@@ -1,9 +1,9 @@
 
 from openai import OpenAI
 import streamlit as st
-
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage, AIMessage, SystemMessage
+
 
 st.markdown("# ChatGPT-like clone")
 
@@ -20,7 +20,7 @@ if agree:
     st.write('Great')
 st.write("Title")
 
-api_key = ''
+api_key = st.secrets["OPENAI_API_KEY"]
 
 
 # Initialize LangChain ChatOpenAI instead of OpenAI client
