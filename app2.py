@@ -15,11 +15,11 @@ from langchain_core.messages import HumanMessage, AIMessage
 # ===============================
 # 🎨 PAGE CONFIGURATION
 # ===============================
-
+app=create_unified_workflow()
 def set_page_config():
     """Configure the Streamlit page."""
     st.set_page_config(
-        page_title="Talk to me",
+        page_title="Talk To Me",
         page_icon="🧠",
         layout="centered",
         initial_sidebar_state="expanded"
@@ -34,7 +34,7 @@ def set_page_style():
     """Apply custom CSS styling."""
     st.markdown("""
         <style>
-            /* Main background - full page */
+        /* Main background - full page */
         .stApp {
             background: linear-gradient(135deg, #d4edf6 0%, #b2f2c3 100%);
         }
@@ -149,7 +149,6 @@ def set_page_style():
 # ===============================
 # 📊 SESSION STATE INITIALIZATION
 # ===============================
-app=create_unified_workflow()
 
 def initialize_session_state():
     """Initialize all session state variables."""
@@ -168,6 +167,7 @@ def initialize_session_state():
     # Workflow phase tracking
     if "phase" not in st.session_state:
         st.session_state.phase = "conversation"  # conversation, questionnaire, recommendations
+    
     # Classification results
     if "disorder" not in st.session_state:
         st.session_state.disorder = None
@@ -224,7 +224,7 @@ def initialize_session_state():
 def setup_sidebar():
     """Configure the sidebar with controls and status."""
     with st.sidebar:
-        st.title("🧠 Talk to me")
+        st.title("🧠 Talk To Me")
         
         # Status indicator
         if st.session_state.student_id:
@@ -236,47 +236,48 @@ def setup_sidebar():
         st.markdown("---")
         
         # Phase indicator
-        st.markdown("### You matter. Your story matters..")
+        st.markdown("### 📍 Current Phase")
         phase = st.session_state.phase
         
         if phase == "conversation":
-            st.markdown('<span class="phase-badge phase-conversation">💬I am right here, listening</span>', 
+            st.markdown('<span class="phase-badge phase-conversation">💬 Conversation</span>', 
                        unsafe_allow_html=True)
-            st.caption("It's okay to not be okay right now")
+            st.caption("Getting to know you and understanding your concerns")
         
         elif phase == "questionnaire":
-            st.markdown('<span class="phase-badge phase-questionnaire">💬You are not a burden</span>', 
+            st.markdown('<span class="phase-badge phase-questionnaire">📝 Assessment</span>', 
                        unsafe_allow_html=True)
-            # progress = st.session_state.questions_answered / 10
-            # st.progress(progress)
-            st.caption("Be gentle with yourself today")
+            progress = st.session_state.questions_answered / 10
+            st.progress(progress)
+            st.caption(f"Question {st.session_state.questions_answered}/10")
         
         elif phase == "recommendations":
-            st.markdown('<span class="phase-badge phase-recommendations">💬There is no "right" way to heal.</span>', 
+            st.markdown('<span class="phase-badge phase-recommendations">🎯 Recommendations</span>', 
                        unsafe_allow_html=True)
-            st.caption("One small step at a time is still progress")
+            st.caption("Personalized guidance based on your assessment")
         
         st.markdown("---")
         
         # Results display (if available)
         if st.session_state.total_score is not None:
-            st.markdown("Your feelings are important")
-            st.caption("You are doing your best in a difficult moment, and that really matters.")
-        #     st.metric("PSS Score", f"{st.session_state.total_score}/40")
-        #     st.metric("Stress Level", st.session_state.score_label)
-        #     st.metric("Severity", st.session_state.severity)
+            st.markdown("### 📊 Your Results")
+            st.metric("PSS Score", f"{st.session_state.total_score}/40")
+            st.metric("Stress Level", st.session_state.score_label)
+            st.metric("Severity", st.session_state.severity)
         
+        st.markdown("---")
         
         # Action buttons
+        st.markdown("### 🎯 Quick Actions")
         
-        if st.button("Start New Session", use_container_width=True):
+        if st.button("🔄 Start New Assessment", use_container_width=True):
             # Reset all session state
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
         
         if st.session_state.phase == "recommendations" and st.session_state.route == "appointment":
-            if st.button(" Book Appointment", use_container_width=True, 
+            if st.button("📅 Book Appointment", use_container_width=True, 
                         disabled=st.session_state.appointment_confirmed):
                 st.session_state.appointment_mode = True
         
@@ -363,11 +364,11 @@ def process_conversation_phase(user_input: str):
             
             # Trigger questionnaire creation
             questionnaire_result = create_questionnaire(result)
-            st.session_state.workflow_state = questionnaire_result
+
+            st.session_state.workflow_state= questionnaire_result
             
             if questionnaire_result.get('messages'):
-                st.session_state.messages.append(questionnaire_result['messages'][-1])
-            
+                 st.session_state.messages.append(questionnaire_result['messages'][-1])
             st.session_state.questionnaire_started = True
         
     except Exception as e:
@@ -381,7 +382,6 @@ def process_questionnaire_phase(user_input: str):
     st.session_state.messages.append(HumanMessage(content=user_input))
     
     state = st.session_state.workflow_state
-    # state['messages']=state.get('messages',[])+[HumanMessage(content=user_input)]
     state['messages'].append(HumanMessage(content=user_input))
     
     try:
@@ -502,7 +502,7 @@ def main():
     if st.session_state.student_id is None:
         st.markdown("""
             <div style='text-align: center; padding: 2rem;'>
-                <h2>Break the silence... </h2>
+                <h2>Break the silence...</h2>
                 <p>Enter your Student ID to start</p>
             </div>
         """, unsafe_allow_html=True)
@@ -511,10 +511,10 @@ def main():
         with col2:
             student_id = st.text_input("Student ID", placeholder="e.g., S2099", label_visibility="collapsed")
             
-            if st.button("Start", use_container_width=True, type="primary"):
+            if st.button("Start Assessment", use_container_width=True, type="primary"):
                 if student_id:
                     st.session_state.student_id = student_id
-                  
+                    
                     # Initialize conversation
                     state = {
                         "student_id": student_id,
@@ -523,8 +523,6 @@ def main():
                     }
                     
                     #result = app.invoke(state)
-                   
-                    
                     result= start_conversation(state)
 
                     st.session_state.workflow_state = result
@@ -598,7 +596,7 @@ def main():
                      # Treatment plan already shown, handle follow-up questions
                     st.session_state.messages.append(HumanMessage(content=prompt))
                     st.session_state.messages.append(AIMessage(
-                        content="Thank you for your question. Remember, the self-care strategies I shared are meant to complement professional support if needed. If your symptoms persist or worsen, please don't hesitate to reach out to a mental health professional. Is there anything specific about the treatment plan you'd like me to clarify?"
+                        content="Remember, the self-care strategies I shared are meant to complement professional support if needed. "
                     ))
                 else:
                     # General follow-up conversation
